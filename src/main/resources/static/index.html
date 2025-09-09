@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gemini Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .chat-container {
+            max-width: 480px;
+            margin: 48px auto;
+            background: rgba(255,255,255,0.07);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            padding: 36px 28px 28px 28px;
+            backdrop-filter: blur(8px);
+        }
+        .chat-title {
+            text-align: center;
+            color: #64ffda;
+            font-size: 2.3em;
+            margin-bottom: 22px;
+            letter-spacing: 1px;
+        }
+        .chat-box {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 13px;
+            border-radius: 9px;
+            border: none;
+            font-size: 1.15em;
+            background: #222;
+            color: #fff;
+            outline: none;
+            box-shadow: 0 2px 8px rgba(100,255,218,0.08);
+            transition: box-shadow 0.2s;
+        }
+        .chat-input:focus {
+            box-shadow: 0 2px 12px rgba(100,255,218,0.18);
+        }
+        .chat-send-btn {
+            background: linear-gradient(90deg, #64ffda 0%, #1de9b6 100%);
+            color: #222;
+            border: none;
+            border-radius: 9px;
+            padding: 0 26px;
+            font-size: 1.15em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(100,255,218,0.12);
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .chat-send-btn:disabled {
+            background: #b2dfdb;
+            color: #888;
+            cursor: not-allowed;
+        }
+        .chat-output {
+            background: #181818;
+            color: #fff;
+            border-radius: 9px;
+            min-height: 70px;
+            padding: 18px;
+            font-size: 1.1em;
+            box-shadow: 0 2px 8px rgba(100,255,218,0.08);
+            max-height: 270px;
+            overflow-y: auto;
+            margin-top: 10px;
+            word-break: break-word;
+        }
+        .chat-output em {
+            color: #64ffda;
+        }
+        .chat-output pre {
+            background: #222;
+            color: #64ffda;
+            border-radius: 7px;
+            padding: 9px;
+            font-size: 1em;
+            overflow-x: auto;
+        }
+        .chat-output code {
+            background: #333;
+            color: #1de9b6;
+            border-radius: 5px;
+            padding: 3px 7px;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h1 class="chat-title">Gemini Chat</h1>
+        <div class="chat-box">
+            <input type="text" id="messageInput" class="chat-input" placeholder="Type your message...">
+            <button id="sendBtn" class="chat-send-btn" onclick="sendNormal()">Send</button>
+        </div>
+        <div id="output" class="chat-output"><em>Waiting for input...</em></div>
+    </div>
+    <script>
+        function sendNormal() {
+            const message = document.getElementById('messageInput').value;
+            const outputDiv = document.getElementById('output');
+            const sendBtn = document.getElementById('sendBtn');
+            outputDiv.innerHTML = '<em>Thinking...</em>';
+            sendBtn.disabled = true;
+
+            fetch('/gemini/chat?message=' + encodeURIComponent(message))
+                .then(response => response.text())
+                .then(data => {
+                    outputDiv.innerHTML = marked.parse(data, {sanitize: true});
+                    sendBtn.disabled = false;
+                })
+                .catch(error => {
+                    outputDiv.innerHTML = '<span style=\"color:#ff5252;\">Error: ' + error.message + '</span>';
+                    sendBtn.disabled = false;
+                });
+        }
+    </script>
+</body>
+</html>
