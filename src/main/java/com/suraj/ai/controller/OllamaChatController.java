@@ -2,11 +2,15 @@ package com.suraj.ai.controller;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
@@ -39,6 +43,22 @@ public class OllamaChatController {
 	@GetMapping(value = "/ollama/stream/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Flux<String> ollamaStreamChat(@RequestParam String message) {
 		return ollamaChatClient.prompt().user(message).stream().content();
+	}
+
+	/**
+	 * Image processing endpoint for ollama
+	 * @param message
+	 * @return
+	 */
+	@PostMapping(value = "/ollama/chat/image")
+	public String ollamaChatWithImageProcessing(@RequestPart("message") String message, @RequestPart("image") MultipartFile multipartFile) {
+		return ollamaChatClient
+				.prompt()
+				.user(prompt ->prompt
+						.text(message)
+						.media(MediaType.IMAGE_PNG, new InputStreamResource(multipartFile)))
+				.call()
+				.content();
 	}
 
 }
